@@ -1,38 +1,19 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, TrendingUp, Star, Target, Crown, Sparkles } from "lucide-react";
+import { ArrowLeft, TrendingUp, Star, Target, Crown, Sparkles, RefreshCw } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { usePredictions, useLatestDraws } from "@/hooks/usePredictions";
 
 const EuroMillions = () => {
   const navigate = useNavigate();
   const [selectedNumbers, setSelectedNumbers] = useState<number[]>([]);
   const [selectedStars, setSelectedStars] = useState<number[]>([]);
-  const [predictedNumbers, setPredictedNumbers] = useState<number[]>([]);
-  const [predictedStars, setPredictedStars] = useState<number[]>([]);
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
-
-  // Simulation d'historique des tirages (à remplacer par vraies données)
-  const simulateHistoricalAnalysis = () => {
-    setIsAnalyzing(true);
-    
-    // Simulation d'analyse des données historiques
-    setTimeout(() => {
-      // Algorithme simplifié de prédiction basé sur fréquence
-      const frequentNumbers = [7, 14, 21, 28, 35, 42, 49, 3, 11, 18, 25, 32, 39, 46, 12, 19, 26, 33, 40, 47];
-      const frequentStars = [2, 5, 8, 11, 3, 7, 9, 12, 1, 4, 6, 10];
-      
-      // Sélection des 8 numéros les plus probables
-      const predicted = frequentNumbers.slice(0, 8).sort((a, b) => a - b);
-      const predictedStarsResult = frequentStars.slice(0, 4).sort((a, b) => a - b);
-      
-      setPredictedNumbers(predicted);
-      setPredictedStars(predictedStarsResult);
-      setIsAnalyzing(false);
-    }, 2000);
-  };
+  
+  const { data: predictions, isLoading: predictionsLoading, refetch: refetchPredictions } = usePredictions('euromillions');
+  const { data: latestDraws, isLoading: drawsLoading } = useLatestDraws('euromillions', 5);
 
   const selectNumber = (num: number) => {
     if (selectedNumbers.includes(num)) {
@@ -51,16 +32,11 @@ const EuroMillions = () => {
   };
 
   const generateOptimalGrid = () => {
-    if (predictedNumbers.length >= 5 && predictedStars.length >= 2) {
-      setSelectedNumbers(predictedNumbers.slice(0, 5));
-      setSelectedStars(predictedStars.slice(0, 2));
+    if (predictions?.predictedNumbers && predictions?.predictedStars) {
+      setSelectedNumbers(predictions.predictedNumbers.slice(0, 5));
+      setSelectedStars(predictions.predictedStars.slice(0, 2));
     }
   };
-
-  useEffect(() => {
-    // Lancement automatique de l'analyse au chargement
-    simulateHistoricalAnalysis();
-  }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-900 via-blue-800 to-yellow-600">
@@ -100,18 +76,26 @@ const EuroMillions = () => {
                 <CardTitle className="flex items-center text-blue-900">
                   <TrendingUp className="w-5 h-5 mr-2 text-yellow-600" />
                   Prédictions IA - Prochain Tirage
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={() => refetchPredictions()}
+                    className="ml-auto text-blue-600 hover:text-blue-800"
+                  >
+                    <RefreshCw className="w-4 h-4" />
+                  </Button>
                 </CardTitle>
                 <CardDescription className="text-blue-700">
-                  Basé sur l'analyse de tous les tirages historiques
+                  Basé sur l'analyse de {predictions?.totalDraws || 0} tirages historiques
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                {isAnalyzing ? (
+                {predictionsLoading ? (
                   <div className="text-center py-8">
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-600 mx-auto mb-4"></div>
                     <p className="text-blue-700 font-medium">Analyse en cours de l'historique complet...</p>
                   </div>
-                ) : (
+                ) : predictions ? (
                   <div className="space-y-6">
                     <div>
                       <h3 className="font-semibold mb-3 text-blue-900 flex items-center">
@@ -119,7 +103,7 @@ const EuroMillions = () => {
                         Numéros les plus probables
                       </h3>
                       <div className="grid grid-cols-8 gap-2 mb-4">
-                        {predictedNumbers.map((num, index) => (
+                        {predictions.predictedNumbers.map((num, index) => (
                           <div key={num} className={`h-12 w-12 rounded-full flex items-center justify-center font-bold text-white shadow-lg ${
                             index < 5 ? 'bg-gradient-to-r from-blue-600 to-blue-700 border-2 border-yellow-400' : 'bg-gradient-to-r from-blue-400 to-blue-500'
                           }`}>
@@ -136,7 +120,7 @@ const EuroMillions = () => {
                         Étoiles les plus probables
                       </h3>
                       <div className="grid grid-cols-4 gap-2 mb-4">
-                        {predictedStars.map((star, index) => (
+                        {(predictions.predictedStars || []).map((star, index) => (
                           <div key={star} className={`h-12 w-12 rounded-full flex items-center justify-center font-bold text-white shadow-lg ${
                             index < 2 ? 'bg-gradient-to-r from-yellow-500 to-yellow-600 border-2 border-blue-400' : 'bg-gradient-to-r from-yellow-400 to-yellow-500'
                           }`}>
@@ -147,6 +131,19 @@ const EuroMillions = () => {
                       <p className="text-xs text-blue-600">Les 2 premières sont les plus recommandées</p>
                     </div>
 
+                    <div className="bg-blue-100 p-4 rounded-lg">
+                      <div className="grid grid-cols-2 gap-4 text-sm">
+                        <div>
+                          <span className="font-semibold text-blue-800">Précision IA:</span>
+                          <span className="ml-2 text-blue-600">{predictions.accuracy}%</span>
+                        </div>
+                        <div>
+                          <span className="font-semibold text-blue-800">Dernière MAJ:</span>
+                          <span className="ml-2 text-blue-600">{predictions.lastUpdate}</span>
+                        </div>
+                      </div>
+                    </div>
+
                     <Button 
                       onClick={generateOptimalGrid} 
                       className="w-full bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-blue-900 font-bold"
@@ -154,6 +151,10 @@ const EuroMillions = () => {
                       <Crown className="w-4 h-4 mr-2" />
                       Utiliser la Grille Optimale IA
                     </Button>
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-red-600">
+                    Erreur lors du chargement des prédictions
                   </div>
                 )}
               </CardContent>
@@ -299,14 +300,14 @@ const EuroMillions = () => {
 
           {/* Statistiques */}
           <div>
-            <Card className="bg-gradient-to-br from-yellow-50 to-blue-50 border-2 border-yellow-300">
+            <Card className="bg-gradient-to-br from-yellow-50 to-blue-50 border-2 border-yellow-300 mb-6">
               <CardHeader>
                 <CardTitle className="flex items-center text-blue-900">
                   <Sparkles className="w-5 h-5 mr-2 text-yellow-600" />
                   Analyse Statistique
                 </CardTitle>
                 <CardDescription className="text-blue-700">
-                  Données basées sur l'historique complet
+                  Données en temps réel
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -314,22 +315,63 @@ const EuroMillions = () => {
                   <div className="text-center p-4 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg">
                     <div className="text-2xl font-bold flex items-center justify-center">
                       <Crown className="w-6 h-6 mr-2 text-yellow-400" />
-                      87.3%
+                      {predictions?.accuracy || '--'}%
                     </div>
                     <div className="text-sm text-blue-100">Précision IA</div>
                   </div>
                   <div className="text-center p-4 bg-gradient-to-r from-yellow-500 to-yellow-600 text-blue-900 rounded-lg">
-                    <div className="text-2xl font-bold">2,847</div>
+                    <div className="text-2xl font-bold">{predictions?.totalDraws || '--'}</div>
                     <div className="text-sm">Tirages analysés</div>
                   </div>
                   <div className="text-center p-4 bg-gradient-to-r from-blue-500 to-yellow-500 text-white rounded-lg">
                     <div className="text-xl font-bold">Dernière MAJ</div>
-                    <div className="text-sm text-blue-100">Il y a 2h</div>
+                    <div className="text-sm text-blue-100">{predictions?.lastUpdate || '--'}</div>
                   </div>
                 </div>
                 <div className="text-xs text-blue-600 text-center">
-                  Algorithme basé sur l'analyse de fréquence et patterns
+                  {predictions?.algorithm || 'Algorithme avancé de prédiction'}
                 </div>
+              </CardContent>
+            </Card>
+
+            {/* Derniers Tirages */}
+            <Card className="bg-white/95 border border-blue-200">
+              <CardHeader>
+                <CardTitle className="flex items-center text-blue-900">
+                  <TrendingUp className="w-5 h-5 mr-2 text-yellow-600" />
+                  Derniers Tirages
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {drawsLoading ? (
+                  <div className="text-center py-4">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+                  </div>
+                ) : latestDraws ? (
+                  <div className="space-y-3">
+                    {latestDraws.map((draw, index) => (
+                      <div key={draw.id} className="flex items-center justify-between p-2 bg-blue-50 rounded">
+                        <span className="text-sm text-blue-600 font-medium">
+                          {new Date(draw.draw_date).toLocaleDateString('fr-FR')}
+                        </span>
+                        <div className="flex gap-1">
+                          {draw.numbers.map((num: number) => (
+                            <div key={num} className="w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-xs font-bold">
+                              {num}
+                            </div>
+                          ))}
+                          {draw.stars.map((star: number) => (
+                            <div key={star} className="w-6 h-6 bg-yellow-500 text-white rounded-full flex items-center justify-center text-xs font-bold">
+                              {star}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-center text-gray-500">Aucun tirage disponible</p>
+                )}
               </CardContent>
             </Card>
           </div>
