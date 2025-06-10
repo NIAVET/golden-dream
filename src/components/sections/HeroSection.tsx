@@ -1,49 +1,48 @@
 
 import React from 'react';
 import { Button } from "@/components/ui/button";
-import { Crown, Sparkles, TrendingUp, RefreshCw, Target } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { TrendingUp, Sparkles, Target } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 const HeroSection = () => {
   const navigate = useNavigate();
 
   return (
-    <section className="py-16 px-4">
-      <div className="container mx-auto text-center">
-        <div className="flex justify-center mb-6">
-          <div className="w-24 h-24 bg-gradient-to-r from-yellow-400 to-yellow-600 rounded-full flex items-center justify-center border-4 border-blue-200 shadow-2xl">
-            <Crown className="w-12 h-12 text-blue-900" />
-          </div>
-        </div>
-        <h2 className="text-5xl font-bold text-white mb-6">
-          Prédisez vos <span className="bg-gradient-to-r from-yellow-300 to-yellow-500 bg-clip-text text-transparent">Numéros Gagnants</span>
+    <section className="py-20 px-4 text-center">
+      <div className="container mx-auto">
+        <Badge className="bg-gradient-to-r from-yellow-400 to-yellow-600 text-blue-900 mb-6 text-sm font-bold border-yellow-300">
+          <Sparkles className="w-4 h-4 mr-1" />
+          Intelligence Artificielle Avancée
+        </Badge>
+        <h2 className="text-5xl md:text-6xl font-bold text-white mb-6 leading-tight">
+          Prédictions IA pour vos
+          <span className="bg-gradient-to-r from-yellow-400 to-yellow-600 bg-clip-text text-transparent block mt-2">
+            Jeux FDJ Préférés
+          </span>
         </h2>
-        <p className="text-xl text-blue-100 mb-8 max-w-3xl mx-auto">
-          Intelligence artificielle avancée pour prédire les numéros les plus susceptibles de sortir au prochain tirage. 
-          Analyse complète de l'historique et mise à jour automatique.
+        <p className="text-xl text-yellow-200 mb-8 max-w-3xl mx-auto leading-relaxed">
+          Découvrez des prédictions intelligentes basées sur l'analyse de milliers de tirages historiques. 
+          Notre IA analyse les tendances pour maximiser vos chances de gain.
         </p>
-        <div className="flex items-center justify-center space-x-6 text-sm text-yellow-200 mb-8">
-          <div className="flex items-center">
-            <Sparkles className="w-4 h-4 mr-1" />
-            Prédictions IA
-          </div>
-          <div className="flex items-center">
-            <TrendingUp className="w-4 h-4 mr-1" />
-            Historique complet
-          </div>
-          <div className="flex items-center">
-            <RefreshCw className="w-4 h-4 mr-1" />
-            Auto-sync
-          </div>
+        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+          <Button 
+            size="lg" 
+            className="bg-gradient-to-r from-yellow-500 to-yellow-600 text-blue-900 hover:from-yellow-400 hover:to-yellow-500 font-bold text-lg px-8 py-3 border-2 border-yellow-300"
+            onClick={() => navigate('/euromillions')}
+          >
+            <Target className="w-5 h-5 mr-2" />
+            Commencer les Prédictions
+          </Button>
+          <Button 
+            variant="outline" 
+            size="lg" 
+            className="border-2 border-yellow-400 text-yellow-400 hover:bg-yellow-400 hover:text-blue-900 font-bold"
+          >
+            <TrendingUp className="w-5 h-5 mr-2" />
+            Voir les Statistiques
+          </Button>
         </div>
-        <Button 
-          size="lg" 
-          className="bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-blue-900 font-bold text-lg px-8"
-          onClick={() => navigate('/euromillions')}
-        >
-          <Target className="w-5 h-5 mr-2" />
-          Commencer les Prédictions
-        </Button>
       </div>
     </section>
   );

@@ -5,6 +5,7 @@ import HeroSection from '@/components/sections/HeroSection';
 import GamesGrid from '@/components/sections/GamesGrid';
 import FeaturesSection from '@/components/sections/FeaturesSection';
 import CTASection from '@/components/sections/CTASection';
+import MobileAppInfo from '@/components/ui/mobile-app-info';
 import Footer from '@/components/layout/Footer';
 
 const Index = () => {
@@ -14,6 +15,7 @@ const Index = () => {
       <HeroSection />
       <GamesGrid />
       <FeaturesSection />
+      <MobileAppInfo />
       <CTASection />
       <Footer />
     </div>
