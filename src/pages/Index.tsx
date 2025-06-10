@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -84,7 +83,7 @@ const Index = () => {
               <div>
                 <h1 className="text-2xl font-bold text-white flex items-center">
                   <Crown className="w-6 h-6 text-yellow-400 mr-2" />
-                  Fortune Analytics Pro
+                  Dream-golden
                 </h1>
                 <p className="text-sm text-yellow-200">Prédicteur IA - Jeux FDJ</p>
               </div>
@@ -241,10 +240,10 @@ const Index = () => {
         <div className="container mx-auto text-center">
           <div className="flex items-center justify-center mb-4">
             <Coins className="w-6 h-6 text-yellow-400 mr-2" />
-            <span className="font-bold text-white">Fortune Analytics Pro</span>
+            <span className="font-bold text-white">Dream-golden</span>
           </div>
           <p className="text-yellow-300">
-            © 2024 Fortune Analytics Pro - Prédicteur IA pour la Française des Jeux
+            © 2024 Dream-golden - Prédicteur IA pour la Française des Jeux
           </p>
           <p className="text-sm text-yellow-400 mt-2">
             Application privée sécurisée - Jeu responsable
