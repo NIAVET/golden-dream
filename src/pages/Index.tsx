@@ -6,6 +6,7 @@ import GamesGrid from '@/components/sections/GamesGrid';
 import FeaturesSection from '@/components/sections/FeaturesSection';
 import CTASection from '@/components/sections/CTASection';
 import MobileAppInfo from '@/components/ui/mobile-app-info';
+import AppStatus from '@/components/system/AppStatus';
 import Footer from '@/components/layout/Footer';
 
 const Index = () => {
@@ -15,6 +16,14 @@ const Index = () => {
       <HeroSection />
       <GamesGrid />
       <FeaturesSection />
+      
+      {/* Ajout du statut de l'application */}
+      <section className="py-8 px-4">
+        <div className="container mx-auto max-w-md">
+          <AppStatus />
+        </div>
+      </section>
+      
       <MobileAppInfo />
       <CTASection />
       <Footer />
