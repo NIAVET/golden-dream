@@ -16,7 +16,7 @@ const Header = () => {
             <div>
               <h1 className="text-2xl font-bold text-white flex items-center">
                 <Crown className="w-6 h-6 text-yellow-400 mr-2" />
-                Dream-golden
+                Golden-Dream
               </h1>
               <p className="text-sm text-yellow-200">Prédicteur IA - Jeux FDJ</p>
             </div>

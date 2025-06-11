@@ -1,9 +1,9 @@
 
 export const APP_CONFIG = {
-  name: 'Dream-golden',
+  name: 'Golden-Dream',
   version: '1.0.0',
   description: 'Prédicteur IA pour jeux de loterie',
-  author: 'Dream-golden Team',
+  author: 'Golden-Dream Team',
   
   // Configuration des jeux supportés
   supportedGames: ['euromillions', 'loto', 'keno'],
