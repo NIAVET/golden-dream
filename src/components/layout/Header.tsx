@@ -2,6 +2,7 @@
 import React from 'react';
 import { Badge } from "@/components/ui/badge";
 import { Crown, Coins, RefreshCw } from "lucide-react";
+import UserProfile from '@/components/auth/UserProfile';
 
 const Header = () => {
   return (
@@ -20,10 +21,14 @@ const Header = () => {
               <p className="text-sm text-yellow-200">Prédicteur IA - Jeux FDJ</p>
             </div>
           </div>
-          <Badge className="bg-gradient-to-r from-yellow-400 to-yellow-600 text-blue-900 border-yellow-300">
-            <RefreshCw className="w-3 h-3 mr-1" />
-            Données à jour
-          </Badge>
+          
+          <div className="flex items-center space-x-4">
+            <Badge className="bg-gradient-to-r from-yellow-400 to-yellow-600 text-blue-900 border-yellow-300">
+              <RefreshCw className="w-3 h-3 mr-1" />
+              Données à jour
+            </Badge>
+            <UserProfile />
+          </div>
         </div>
       </div>
     </header>
