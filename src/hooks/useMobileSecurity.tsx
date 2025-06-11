@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { Preferences } from '@capacitor/preferences';
-import { BiometricAuth, BiometryType } from '@capacitor/biometric';
+import { BiometricAuth, BiometryType } from '@capacitor/biometric-auth';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
