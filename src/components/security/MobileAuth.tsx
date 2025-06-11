@@ -17,13 +17,18 @@ const MobileAuth = ({ onAuthenticated, onSkip }: MobileAuthProps) => {
   const [isAuthenticating, setIsAuthenticating] = useState(false);
   const [error, setError] = useState('');
 
+  console.log('MobileAuth: Rendering with settings.pinEnabled =', settings.pinEnabled);
+
   const handlePinAuth = async () => {
     if (pin.length !== 4) return;
 
     setIsAuthenticating(true);
     setError('');
 
+    console.log('MobileAuth: Verifying PIN...');
     const isValid = await verifyPin(pin);
+    console.log('MobileAuth: PIN verification result:', isValid);
+    
     if (isValid) {
       onAuthenticated();
     } else {
@@ -34,12 +39,7 @@ const MobileAuth = ({ onAuthenticated, onSkip }: MobileAuthProps) => {
     setIsAuthenticating(false);
   };
 
-  // If no security is enabled, allow access
-  if (!settings.pinEnabled) {
-    onAuthenticated();
-    return null;
-  }
-
+  // Toujours afficher l'écran de PIN si on arrive ici
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-900 via-blue-800 to-yellow-600 flex items-center justify-center p-4">
       <Card className="w-full max-w-sm bg-white/95 backdrop-blur">
