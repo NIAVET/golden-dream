@@ -22,7 +22,14 @@ const config: CapacitorConfig = {
     },
     StatusBar: {
       style: "DARK"
+    },
+    BiometricAuth: {
+      allowDeviceCredential: true
     }
+  },
+  android: {
+    allowMixedContent: true,
+    captureInput: true
   }
 };
 
