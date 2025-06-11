@@ -10,108 +10,141 @@ export const useMobileFeatures = () => {
 
   useEffect(() => {
     const initMobile = async () => {
-      if (Capacitor.isNativePlatform()) {
-        setIsNative(true);
-        
-        try {
-          // Configure status bar
-          const { StatusBar, Style } = await import('@capacitor/status-bar');
-          await StatusBar.setStyle({ style: Style.Dark });
-        } catch (error) {
-          console.log('StatusBar not available:', error);
+      try {
+        if (Capacitor.isNativePlatform()) {
+          setIsNative(true);
+          console.log('Initializing mobile features...');
+          
+          // Configure status bar with error handling
+          await setupStatusBar();
+          
+          // Hide splash screen with error handling
+          await setupSplashScreen();
+          
+          // Setup push notifications with error handling
+          await setupPushNotifications();
+          
+          // Setup network monitoring with error handling
+          await setupNetworkMonitoring();
+          
+          // Request local notification permissions with error handling
+          await setupLocalNotifications();
+          
+          console.log('Mobile features initialized successfully');
         }
-        
-        try {
-          // Hide splash screen after app loads
-          const { SplashScreen } = await import('@capacitor/splash-screen');
-          await SplashScreen.hide();
-        } catch (error) {
-          console.log('SplashScreen not available:', error);
-        }
-        
-        // Setup push notifications
-        await setupPushNotifications();
-        
-        // Setup network monitoring
-        await setupNetworkMonitoring();
-        
-        // Request local notification permissions
-        await setupLocalNotifications();
-        
-        console.log('Mobile features initialized');
+      } catch (error) {
+        console.error('Error initializing mobile features:', error);
       }
     };
 
     initMobile();
   }, []);
 
-  const setupPushNotifications = async () => {
+  const setupStatusBar = async () => {
     try {
-      const { PushNotifications } = await import('@capacitor/push-notifications');
-      const permission = await PushNotifications.requestPermissions();
-      if (permission.receive === 'granted') {
-        await PushNotifications.register();
-        
-        PushNotifications.addListener('registration', (token) => {
-          console.log('Push registration success, token: ' + token.value);
-        });
-
-        PushNotifications.addListener('pushNotificationReceived', (notification) => {
-          toast({
-            title: notification.title || 'Nouvelle notification',
-            description: notification.body || 'Vous avez reçu une notification'
-          });
-        });
+      if (Capacitor.isPluginAvailable('StatusBar')) {
+        const { StatusBar, Style } = await import('@capacitor/status-bar');
+        await StatusBar.setStyle({ style: Style.Dark });
+        console.log('StatusBar configured');
       }
     } catch (error) {
-      console.log('Push notifications not available:', error);
+      console.log('StatusBar not available or failed to configure:', error);
+    }
+  };
+
+  const setupSplashScreen = async () => {
+    try {
+      if (Capacitor.isPluginAvailable('SplashScreen')) {
+        const { SplashScreen } = await import('@capacitor/splash-screen');
+        await SplashScreen.hide();
+        console.log('SplashScreen hidden');
+      }
+    } catch (error) {
+      console.log('SplashScreen not available or failed to hide:', error);
+    }
+  };
+
+  const setupPushNotifications = async () => {
+    try {
+      if (Capacitor.isPluginAvailable('PushNotifications')) {
+        const { PushNotifications } = await import('@capacitor/push-notifications');
+        const permission = await PushNotifications.requestPermissions();
+        
+        if (permission.receive === 'granted') {
+          await PushNotifications.register();
+          
+          PushNotifications.addListener('registration', (token) => {
+            console.log('Push registration success, token: ' + token.value);
+          });
+
+          PushNotifications.addListener('pushNotificationReceived', (notification) => {
+            toast({
+              title: notification.title || 'Nouvelle notification',
+              description: notification.body || 'Vous avez reçu une notification'
+            });
+          });
+          
+          console.log('Push notifications configured');
+        }
+      }
+    } catch (error) {
+      console.log('Push notifications not available or failed to configure:', error);
     }
   };
 
   const setupLocalNotifications = async () => {
     try {
-      const { LocalNotifications } = await import('@capacitor/local-notifications');
-      await LocalNotifications.requestPermissions();
+      if (Capacitor.isPluginAvailable('LocalNotifications')) {
+        const { LocalNotifications } = await import('@capacitor/local-notifications');
+        await LocalNotifications.requestPermissions();
+        console.log('Local notifications configured');
+      }
     } catch (error) {
-      console.log('Local notifications not available:', error);
+      console.log('Local notifications not available or failed to configure:', error);
     }
   };
 
   const setupNetworkMonitoring = async () => {
     try {
-      const { Network } = await import('@capacitor/network');
-      const status = await Network.getStatus();
-      setNetworkStatus(status);
-
-      Network.addListener('networkStatusChange', (status) => {
+      if (Capacitor.isPluginAvailable('Network')) {
+        const { Network } = await import('@capacitor/network');
+        const status = await Network.getStatus();
         setNetworkStatus(status);
-        if (!status.connected) {
-          toast({
-            title: 'Connexion perdue',
-            description: 'Vérifiez votre connexion Internet',
-            variant: 'destructive'
-          });
-        }
-      });
+
+        Network.addListener('networkStatusChange', (status) => {
+          setNetworkStatus(status);
+          if (!status.connected) {
+            toast({
+              title: 'Connexion perdue',
+              description: 'Vérifiez votre connexion Internet',
+              variant: 'destructive'
+            });
+          }
+        });
+        
+        console.log('Network monitoring configured');
+      }
     } catch (error) {
-      console.log('Network monitoring not available:', error);
+      console.log('Network monitoring not available or failed to configure:', error);
     }
   };
 
   const sendLocalNotification = async (title: string, body: string) => {
     if (isNative) {
       try {
-        const { LocalNotifications } = await import('@capacitor/local-notifications');
-        await LocalNotifications.schedule({
-          notifications: [
-            {
-              title,
-              body,
-              id: Date.now(),
-              schedule: { at: new Date(Date.now() + 1000) }
-            }
-          ]
-        });
+        if (Capacitor.isPluginAvailable('LocalNotifications')) {
+          const { LocalNotifications } = await import('@capacitor/local-notifications');
+          await LocalNotifications.schedule({
+            notifications: [
+              {
+                title,
+                body,
+                id: Date.now(),
+                schedule: { at: new Date(Date.now() + 1000) }
+              }
+            ]
+          });
+        }
       } catch (error) {
         console.log('Local notification failed:', error);
       }
@@ -121,11 +154,13 @@ export const useMobileFeatures = () => {
   const vibrate = async (style: 'light' | 'medium' | 'heavy' = 'medium') => {
     if (isNative) {
       try {
-        const { Haptics, ImpactStyle } = await import('@capacitor/haptics');
-        const impactStyle = style === 'light' ? ImpactStyle.Light : 
-                           style === 'heavy' ? ImpactStyle.Heavy : 
-                           ImpactStyle.Medium;
-        await Haptics.impact({ style: impactStyle });
+        if (Capacitor.isPluginAvailable('Haptics')) {
+          const { Haptics, ImpactStyle } = await import('@capacitor/haptics');
+          const impactStyle = style === 'light' ? ImpactStyle.Light : 
+                             style === 'heavy' ? ImpactStyle.Heavy : 
+                             ImpactStyle.Medium;
+          await Haptics.impact({ style: impactStyle });
+        }
       } catch (error) {
         console.log('Haptics not available:', error);
       }
