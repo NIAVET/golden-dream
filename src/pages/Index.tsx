@@ -4,6 +4,7 @@ import ProtectedRoute from '@/components/auth/ProtectedRoute';
 import Header from '@/components/layout/Header';
 import HeroSection from '@/components/sections/HeroSection';
 import GamesGrid from '@/components/sections/GamesGrid';
+import UpcomingEvents from '@/components/sections/UpcomingEvents';
 import FeaturesSection from '@/components/sections/FeaturesSection';
 import CTASection from '@/components/sections/CTASection';
 import MobileAppInfo from '@/components/ui/mobile-app-info';
@@ -18,6 +19,7 @@ const Index = () => {
         <Header />
         <HeroSection />
         <GamesGrid />
+        <UpcomingEvents />
         <FeaturesSection />
         
         {/* Ajout du statut de l'application */}

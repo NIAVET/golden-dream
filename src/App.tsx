@@ -8,6 +8,7 @@ import { AuthProvider } from "@/hooks/useAuth";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import EuroMillions from "./pages/EuroMillions";
+import SpecialDraws from "./pages/SpecialDraws";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -23,6 +24,7 @@ const App = () => (
             <Route path="/auth" element={<Auth />} />
             <Route path="/" element={<Index />} />
             <Route path="/euromillions" element={<EuroMillions />} />
+            <Route path="/special-draws" element={<SpecialDraws />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

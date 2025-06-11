@@ -3,7 +3,7 @@ import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Crown, Star, Zap, Dice6, TrendingUp } from "lucide-react";
+import { Crown, Star, Zap, Dice6, TrendingUp, Calendar } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 const GamesGrid = () => {
@@ -96,6 +96,25 @@ const GamesGrid = () => {
               </CardContent>
             </Card>
           ))}
+        </div>
+        
+        {/* Nouveau bouton pour les tirages exceptionnels */}
+        <div className="mt-8 text-center">
+          <Card className="bg-gradient-to-r from-yellow-400 to-yellow-600 border-2 border-yellow-500 shadow-2xl max-w-md mx-auto">
+            <CardContent className="p-6">
+              <Calendar className="w-12 h-12 text-blue-900 mx-auto mb-4" />
+              <h3 className="text-xl font-bold text-blue-900 mb-2">Tirages Exceptionnels</h3>
+              <p className="text-blue-800 text-sm mb-4">
+                Découvrez l'historique des super-tirages et événements spéciaux
+              </p>
+              <Button 
+                onClick={() => navigate('/special-draws')}
+                className="bg-blue-900 text-white hover:bg-blue-800 w-full"
+              >
+                Voir l'historique FDJ
+              </Button>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </section>
