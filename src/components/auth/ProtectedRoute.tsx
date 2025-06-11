@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useMobileSecurity } from '@/hooks/useMobileSecurity';
@@ -14,8 +14,20 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   const { user, loading } = useAuth();
   const { settings } = useMobileSecurity();
   const [isMobileAuthenticated, setIsMobileAuthenticated] = useState(false);
+  const [isCheckingMobileAuth, setIsCheckingMobileAuth] = useState(true);
 
-  if (loading) {
+  // Reset mobile authentication when user changes or settings change
+  useEffect(() => {
+    if (user && settings.pinEnabled) {
+      setIsMobileAuthenticated(false);
+      setIsCheckingMobileAuth(false);
+    } else {
+      setIsMobileAuthenticated(true);
+      setIsCheckingMobileAuth(false);
+    }
+  }, [user, settings.pinEnabled]);
+
+  if (loading || isCheckingMobileAuth) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-900 via-blue-800 to-yellow-600 flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-white" />
