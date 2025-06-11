@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Preferences } from '@capacitor/preferences';
 import { BiometricAuth, BiometryType } from '@capacitor/biometric-auth';
