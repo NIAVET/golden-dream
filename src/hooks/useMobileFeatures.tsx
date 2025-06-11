@@ -1,12 +1,6 @@
 
 import { useState, useEffect } from 'react';
 import { Capacitor } from '@capacitor/core';
-import { StatusBar, Style } from '@capacitor/status-bar';
-import { SplashScreen } from '@capacitor/splash-screen';
-import { PushNotifications } from '@capacitor/push-notifications';
-import { LocalNotifications } from '@capacitor/local-notifications';
-import { Haptics, ImpactStyle } from '@capacitor/haptics';
-import { Network } from '@capacitor/network';
 import { useToast } from '@/hooks/use-toast';
 
 export const useMobileFeatures = () => {
@@ -19,11 +13,21 @@ export const useMobileFeatures = () => {
       if (Capacitor.isNativePlatform()) {
         setIsNative(true);
         
-        // Configure status bar
-        await StatusBar.setStyle({ style: Style.Dark });
+        try {
+          // Configure status bar
+          const { StatusBar, Style } = await import('@capacitor/status-bar');
+          await StatusBar.setStyle({ style: Style.Dark });
+        } catch (error) {
+          console.log('StatusBar not available:', error);
+        }
         
-        // Hide splash screen after app loads
-        await SplashScreen.hide();
+        try {
+          // Hide splash screen after app loads
+          const { SplashScreen } = await import('@capacitor/splash-screen');
+          await SplashScreen.hide();
+        } catch (error) {
+          console.log('SplashScreen not available:', error);
+        }
         
         // Setup push notifications
         await setupPushNotifications();
@@ -32,7 +36,7 @@ export const useMobileFeatures = () => {
         await setupNetworkMonitoring();
         
         // Request local notification permissions
-        await LocalNotifications.requestPermissions();
+        await setupLocalNotifications();
         
         console.log('Mobile features initialized');
       }
@@ -43,6 +47,7 @@ export const useMobileFeatures = () => {
 
   const setupPushNotifications = async () => {
     try {
+      const { PushNotifications } = await import('@capacitor/push-notifications');
       const permission = await PushNotifications.requestPermissions();
       if (permission.receive === 'granted') {
         await PushNotifications.register();
@@ -59,44 +64,71 @@ export const useMobileFeatures = () => {
         });
       }
     } catch (error) {
-      console.error('Push notification setup error:', error);
+      console.log('Push notifications not available:', error);
+    }
+  };
+
+  const setupLocalNotifications = async () => {
+    try {
+      const { LocalNotifications } = await import('@capacitor/local-notifications');
+      await LocalNotifications.requestPermissions();
+    } catch (error) {
+      console.log('Local notifications not available:', error);
     }
   };
 
   const setupNetworkMonitoring = async () => {
-    const status = await Network.getStatus();
-    setNetworkStatus(status);
-
-    Network.addListener('networkStatusChange', (status) => {
+    try {
+      const { Network } = await import('@capacitor/network');
+      const status = await Network.getStatus();
       setNetworkStatus(status);
-      if (!status.connected) {
-        toast({
-          title: 'Connexion perdue',
-          description: 'Vérifiez votre connexion Internet',
-          variant: 'destructive'
-        });
-      }
-    });
+
+      Network.addListener('networkStatusChange', (status) => {
+        setNetworkStatus(status);
+        if (!status.connected) {
+          toast({
+            title: 'Connexion perdue',
+            description: 'Vérifiez votre connexion Internet',
+            variant: 'destructive'
+          });
+        }
+      });
+    } catch (error) {
+      console.log('Network monitoring not available:', error);
+    }
   };
 
   const sendLocalNotification = async (title: string, body: string) => {
     if (isNative) {
-      await LocalNotifications.schedule({
-        notifications: [
-          {
-            title,
-            body,
-            id: Date.now(),
-            schedule: { at: new Date(Date.now() + 1000) }
-          }
-        ]
-      });
+      try {
+        const { LocalNotifications } = await import('@capacitor/local-notifications');
+        await LocalNotifications.schedule({
+          notifications: [
+            {
+              title,
+              body,
+              id: Date.now(),
+              schedule: { at: new Date(Date.now() + 1000) }
+            }
+          ]
+        });
+      } catch (error) {
+        console.log('Local notification failed:', error);
+      }
     }
   };
 
-  const vibrate = async (style: ImpactStyle = ImpactStyle.Medium) => {
+  const vibrate = async (style: 'light' | 'medium' | 'heavy' = 'medium') => {
     if (isNative) {
-      await Haptics.impact({ style });
+      try {
+        const { Haptics, ImpactStyle } = await import('@capacitor/haptics');
+        const impactStyle = style === 'light' ? ImpactStyle.Light : 
+                           style === 'heavy' ? ImpactStyle.Heavy : 
+                           ImpactStyle.Medium;
+        await Haptics.impact({ style: impactStyle });
+      } catch (error) {
+        console.log('Haptics not available:', error);
+      }
     }
   };
 
