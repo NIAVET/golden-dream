@@ -29,7 +29,7 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   }
 
   // Check mobile authentication if security is enabled
-  if ((settings.pinEnabled || settings.biometricEnabled) && !isMobileAuthenticated) {
+  if (settings.pinEnabled && !isMobileAuthenticated) {
     return (
       <MobileAuth
         onAuthenticated={() => setIsMobileAuthenticated(true)}
