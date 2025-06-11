@@ -18,13 +18,22 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
 
   // Reset mobile authentication when user changes or settings change
   useEffect(() => {
-    if (user && settings.pinEnabled) {
-      setIsMobileAuthenticated(false);
-      setIsCheckingMobileAuth(false);
+    console.log('ProtectedRoute: user', user?.id, 'pinEnabled', settings.pinEnabled);
+    
+    if (user) {
+      if (settings.pinEnabled) {
+        // Si le PIN est activé, forcer la ré-authentification
+        setIsMobileAuthenticated(false);
+      } else {
+        // Si pas de PIN, autoriser l'accès
+        setIsMobileAuthenticated(true);
+      }
     } else {
-      setIsMobileAuthenticated(true);
-      setIsCheckingMobileAuth(false);
+      // Pas d'utilisateur, pas d'accès mobile
+      setIsMobileAuthenticated(false);
     }
+    
+    setIsCheckingMobileAuth(false);
   }, [user, settings.pinEnabled]);
 
   if (loading || isCheckingMobileAuth) {
@@ -42,14 +51,22 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
 
   // Check mobile authentication if security is enabled
   if (settings.pinEnabled && !isMobileAuthenticated) {
+    console.log('ProtectedRoute: Showing MobileAuth because PIN is enabled and not authenticated');
     return (
       <MobileAuth
-        onAuthenticated={() => setIsMobileAuthenticated(true)}
-        onSkip={() => setIsMobileAuthenticated(true)}
+        onAuthenticated={() => {
+          console.log('ProtectedRoute: PIN authentication successful');
+          setIsMobileAuthenticated(true);
+        }}
+        onSkip={() => {
+          console.log('ProtectedRoute: PIN authentication skipped');
+          setIsMobileAuthenticated(true);
+        }}
       />
     );
   }
 
+  console.log('ProtectedRoute: Allowing access to protected content');
   return <>{children}</>;
 };
 
