@@ -25,8 +25,8 @@ const GamesGrid = () => {
       title: 'Loto',
       description: 'Le jeu mythique français',
       icon: Star,
-      status: 'Bientôt',
-      statusColor: 'bg-yellow-500',
+      status: 'Disponible',
+      statusColor: 'bg-green-500',
       features: ['5 numéros + 1 chance', 'Tirages 3 fois/semaine', 'Analyse historique'],
       route: '/loto'
     },
@@ -35,8 +35,8 @@ const GamesGrid = () => {
       title: 'EuroDreams',
       description: 'Rente mensuelle à vie',
       icon: Zap,
-      status: 'Bientôt',
-      statusColor: 'bg-yellow-500',
+      status: 'Disponible',
+      statusColor: 'bg-green-500',
       features: ['6 numéros + 1 rêve', '20 000€/mois à vie', 'Nouveau format'],
       route: '/eurodreams'
     },
@@ -45,8 +45,8 @@ const GamesGrid = () => {
       title: 'Keno',
       description: 'Tirages quotidiens',
       icon: Dice6,
-      status: 'Bientôt',
-      statusColor: 'bg-yellow-500',
+      status: 'Disponible',
+      statusColor: 'bg-green-500',
       features: ['1 à 10 numéros', 'Tirages toutes les 4min', 'Gains rapides'],
       route: '/keno'
     }
@@ -88,10 +88,9 @@ const GamesGrid = () => {
                 </ul>
                 <Button 
                   className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white hover:from-blue-700 hover:to-blue-800"
-                  onClick={() => game.id === 'euromillions' ? navigate(game.route) : null}
-                  disabled={game.id !== 'euromillions'}
+                  onClick={() => navigate(game.route)}
                 >
-                  {game.id === 'euromillions' ? 'Analyser Maintenant' : 'Bientôt Disponible'}
+                  Analyser Maintenant
                 </Button>
               </CardContent>
             </Card>
