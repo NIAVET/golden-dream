@@ -25,11 +25,20 @@ const config: CapacitorConfig = {
     },
     BiometricAuth: {
       allowDeviceCredential: true
+    },
+    PushNotifications: {
+      presentationOptions: ["badge", "sound", "alert"]
+    },
+    LocalNotifications: {
+      smallIcon: "ic_stat_icon_config_sample",
+      iconColor: "#1e3a8a",
+      sound: "beep.wav"
     }
   },
   android: {
     allowMixedContent: true,
-    captureInput: true
+    captureInput: true,
+    webContentsDebuggingEnabled: true
   }
 };
 
