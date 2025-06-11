@@ -1,30 +1,25 @@
+
 import { useState, useEffect } from 'react';
 import { Preferences } from '@capacitor/preferences';
-import { BiometricAuth, BiometryType } from '@capacitor/biometric-auth';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 
 interface SecuritySettings {
   pinEnabled: boolean;
-  biometricEnabled: boolean;
-  biometricType: BiometryType | null;
 }
 
 export const useMobileSecurity = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [settings, setSettings] = useState<SecuritySettings>({
-    pinEnabled: false,
-    biometricEnabled: false,
-    biometricType: null
+    pinEnabled: false
   });
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     if (user) {
       loadSecuritySettings();
-      checkBiometricAvailability();
     }
   }, [user]);
 
@@ -34,31 +29,17 @@ export const useMobileSecurity = () => {
     try {
       const { data } = await supabase
         .from('user_settings')
-        .select('pin_enabled, biometric_enabled')
+        .select('pin_enabled')
         .eq('id', user.id)
         .single();
 
       if (data) {
-        setSettings(prev => ({
-          ...prev,
-          pinEnabled: data.pin_enabled || false,
-          biometricEnabled: data.biometric_enabled || false
-        }));
+        setSettings({
+          pinEnabled: data.pin_enabled || false
+        });
       }
     } catch (error) {
       console.error('Error loading security settings:', error);
-    }
-  };
-
-  const checkBiometricAvailability = async () => {
-    try {
-      const result = await BiometricAuth.checkBiometry();
-      setSettings(prev => ({
-        ...prev,
-        biometricType: result.biometryType
-      }));
-    } catch (error) {
-      console.log('Biometric not available:', error);
     }
   };
 
@@ -86,7 +67,7 @@ export const useMobileSecurity = () => {
         value: pinHash
       });
 
-      setSettings(prev => ({ ...prev, pinEnabled: true }));
+      setSettings({ pinEnabled: true });
       
       toast({
         title: "Code PIN configuré",
@@ -121,102 +102,33 @@ export const useMobileSecurity = () => {
     }
   };
 
-  const enableBiometric = async (): Promise<boolean> => {
-    if (!user) return false;
-
-    setIsLoading(true);
-    try {
-      // Check if biometric is available
-      await BiometricAuth.checkBiometry();
-      
-      // Request biometric authentication
-      const result = await BiometricAuth.authenticate({
-        reason: 'Activez l\'authentification biométrique pour Dream-golden',
-        title: 'Authentification biométrique',
-        subtitle: 'Utilisez votre empreinte digitale ou Face ID',
-        fallbackTitle: 'Utiliser le code PIN'
-      });
-
-      if (result.isAuthenticated) {
-        const { error } = await supabase
-          .from('user_settings')
-          .update({ biometric_enabled: true })
-          .eq('id', user.id);
-
-        if (error) throw error;
-
-        setSettings(prev => ({ ...prev, biometricEnabled: true }));
-        
-        toast({
-          title: "Biométrie activée",
-          description: "L'authentification biométrique a été activée"
-        });
-        
-        return true;
-      }
-      
-      return false;
-    } catch (error) {
-      console.error('Error enabling biometric:', error);
-      toast({
-        title: "Erreur",
-        description: "Impossible d'activer l'authentification biométrique",
-        variant: "destructive"
-      });
-      return false;
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const authenticateWithBiometric = async (): Promise<boolean> => {
-    try {
-      const result = await BiometricAuth.authenticate({
-        reason: 'Authentifiez-vous pour accéder à Dream-golden',
-        title: 'Authentification biométrique',
-        subtitle: 'Utilisez votre empreinte digitale ou Face ID',
-        fallbackTitle: 'Utiliser le code PIN'
-      });
-
-      return result.isAuthenticated;
-    } catch (error) {
-      console.error('Biometric authentication failed:', error);
-      return false;
-    }
-  };
-
-  const disableSecurity = async (type: 'pin' | 'biometric') => {
+  const disablePin = async () => {
     if (!user) return;
 
     setIsLoading(true);
     try {
-      const updates = type === 'pin' 
-        ? { pin_enabled: false, pin_hash: null }
-        : { biometric_enabled: false };
-
       const { error } = await supabase
         .from('user_settings')
-        .update(updates)
+        .update({ 
+          pin_enabled: false, 
+          pin_hash: null 
+        })
         .eq('id', user.id);
 
       if (error) throw error;
 
-      if (type === 'pin') {
-        await Preferences.remove({ key: 'userPin' });
-        setSettings(prev => ({ ...prev, pinEnabled: false }));
-      } else {
-        setSettings(prev => ({ ...prev, biometricEnabled: false }));
-      }
+      await Preferences.remove({ key: 'userPin' });
+      setSettings({ pinEnabled: false });
 
       toast({
         title: "Sécurité désactivée",
-        description: `${type === 'pin' ? 'Code PIN' : 'Biométrie'} désactivé(e)`
+        description: "Code PIN désactivé"
       });
     } catch (error) {
-      console.error(`Error disabling ${type}:`, error);
+      console.error('Error disabling PIN:', error);
       toast({
         title: "Erreur",
-        description: `Impossible de désactiver ${type === 'pin' ? 'le code PIN' : 'la biométrie'}`,
+        description: "Impossible de désactiver le code PIN",
         variant: "destructive"
       });
     } finally {
@@ -229,8 +141,6 @@ export const useMobileSecurity = () => {
     isLoading,
     setupPin,
     verifyPin,
-    enableBiometric,
-    authenticateWithBiometric,
-    disableSecurity
+    disablePin
   };
 };

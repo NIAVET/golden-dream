@@ -7,10 +7,10 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
 import { useMobileSecurity } from '@/hooks/useMobileSecurity';
-import { Shield, Fingerprint, KeyRound, Smartphone } from 'lucide-react';
+import { Shield, KeyRound } from 'lucide-react';
 
 const SecuritySettings = () => {
-  const { settings, isLoading, setupPin, enableBiometric, disableSecurity } = useMobileSecurity();
+  const { settings, isLoading, setupPin, disablePin } = useMobileSecurity();
   const [newPin, setNewPin] = useState('');
   const [confirmPin, setConfirmPin] = useState('');
   const [showPinSetup, setShowPinSetup] = useState(false);
@@ -29,34 +29,6 @@ const SecuritySettings = () => {
       setNewPin('');
       setConfirmPin('');
       setShowPinSetup(false);
-    }
-  };
-
-  const getBiometricIcon = () => {
-    switch (settings.biometricType) {
-      case 'touchId':
-      case 'fingerprintAuthentication':
-        return <Fingerprint className="h-5 w-5" />;
-      case 'faceId':
-      case 'faceAuthentication':
-        return <Shield className="h-5 w-5" />;
-      default:
-        return <Smartphone className="h-5 w-5" />;
-    }
-  };
-
-  const getBiometricLabel = () => {
-    switch (settings.biometricType) {
-      case 'touchId':
-        return 'Touch ID';
-      case 'faceId':
-        return 'Face ID';
-      case 'fingerprintAuthentication':
-        return 'Empreinte digitale';
-      case 'faceAuthentication':
-        return 'Reconnaissance faciale';
-      default:
-        return 'Biométrie';
     }
   };
 
@@ -85,7 +57,7 @@ const SecuritySettings = () => {
                 if (checked) {
                   setShowPinSetup(true);
                 } else {
-                  disableSecurity('pin');
+                  disablePin();
                 }
               }}
               disabled={isLoading}
@@ -146,43 +118,11 @@ const SecuritySettings = () => {
           )}
         </div>
 
-        {/* Biometric Section */}
-        {settings.biometricType && (
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                {getBiometricIcon()}
-                <span className="font-medium">{getBiometricLabel()}</span>
-                {settings.biometricEnabled && (
-                  <Badge className="bg-green-500 text-white">Activé</Badge>
-                )}
-              </div>
-              <Switch
-                checked={settings.biometricEnabled}
-                onCheckedChange={(checked) => {
-                  if (checked) {
-                    enableBiometric();
-                  } else {
-                    disableSecurity('biometric');
-                  }
-                }}
-                disabled={isLoading}
-              />
-            </div>
-            
-            <p className="text-sm text-gray-600">
-              Utilisez votre {getBiometricLabel().toLowerCase()} pour un accès rapide et sécurisé
-            </p>
-          </div>
-        )}
-
-        {!settings.biometricType && (
-          <div className="p-4 border rounded-lg bg-yellow-50 border-yellow-200">
-            <p className="text-sm text-yellow-800">
-              L'authentification biométrique n'est pas disponible sur cet appareil
-            </p>
-          </div>
-        )}
+        <div className="p-4 border rounded-lg bg-blue-50 border-blue-200">
+          <p className="text-sm text-blue-800">
+            Utilisez un code PIN à 4 chiffres pour sécuriser l'accès à votre application
+          </p>
+        </div>
       </CardContent>
     </Card>
   );
