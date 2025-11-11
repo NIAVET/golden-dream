@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Golden Dream</title>
+  <link rel="icon" href="favicon.ico" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="hero">
+    <div class="hero__top">
+      <div class="logo-badge" aria-label="Golden Dream">GD</div>
+      <div id="apiBadge" class="api-badge api-badge--ko">API : KO</div>
+    </div>
+
+    <h1 class="hero__title"><span>Golden</span> <span>Dream</span></h1>
+    <p class="hero__subtitle">Rèv-la sé on senfoni ka fè nou sonjé ki pli bèl-la ka vini.</p>
+  </header>
+
+  <main class="container">
+    <section class="grid">
+      <!-- Loto -->
+      <article class="card card--loto" data-game="loto">
+        <h2 class="card__title">🎯 <span>Loto</span></h2>
+        <div class="card__row"><span>Dernier :</span> <strong data-last="loto">—</strong></div>
+        <div class="card__row"><span>Préd. :</span> <strong data-pred="loto">—</strong></div>
+      </article>
+
+      <!-- EuroMillions -->
+      <article class="card card--euromillions" data-game="euromillions">
+        <h2 class="card__title">🌐 <span>EuroMillions</span></h2>
+        <div class="card__row"><span>Dernier :</span> <strong data-last="euromillions">—</strong></div>
+        <div class="card__row"><span>Préd. :</span> <strong data-pred="euromillions">—</strong></div>
+      </article>
+
+      <!-- EuroDreams -->
+      <article class="card card--eurodreams" data-game="eurodreams">
+        <h2 class="card__title">🌙 <span>EuroDreams</span></h2>
+        <div class="card__row"><span>Dernier :</span> <strong data-last="eurodreams">—</strong></div>
+        <div class="card__row"><span>Préd. :</span> <strong data-pred="eurodreams">—</strong></div>
+      </article>
+
+      <!-- Keno -->
+      <article class="card card--keno" data-game="keno">
+        <h2 class="card__title">🎲 <span>Keno</span></h2>
+        <div class="card__row"><span>Dernier :</span> <strong data-last="keno">—</strong></div>
+        <div class="card__row"><span>Préd. :</span> <strong data-pred="keno">—</strong></div>
+      </article>
+
+      <!-- Tirages spéciaux -->
+      <article class="card card--specials" data-game="specials">
+        <h2 class="card__title">⭐ <span>Tirages spéciaux</span></h2>
+        <div class="card__row"><span>Dernier :</span> <strong data-last="specials">—</strong></div>
+        <div class="card__row"><span>Préd. :</span> <strong data-pred="specials">—</strong></div>
+      </article>
+
+      <!-- Cressendo -->
+      <article class="card card--cressendo" data-game="cressendo">
+        <h2 class="card__title">🚀 <span>Cressendo</span></h2>
+        <div class="card__row"><span>Dernier :</span> <strong data-last="cressendo">—</strong></div>
+        <div class="card__row"><span>Préd. :</span> <strong data-pred="cressendo">—</strong></div>
+      </article>
+    </section>
+
+    <section class="actions">
+      <button id="btnRefresh" class="btn btn--gold">Rafraîchir l’état</button>
+      <button id="btnReset" class="btn btn--ghost">Réinit. API (vider logs)</button>
+    </section>
+
+    <section class="logs">
+      <pre id="logs" class="logs__pre"></pre>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p>« De la douceur de la vision naît la puissance du rêve. »</p>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

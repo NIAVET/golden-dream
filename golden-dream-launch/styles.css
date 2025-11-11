@@ -1,0 +1,129 @@
+@font-face{
+  font-family: "Inter";
+  src: local("Inter"), url("https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap");
+}
+
+/* Reset + base */
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  color:#0b2530;
+  background:#f3e7d4;
+  display:flex; flex-direction:column;
+}
+
+/* Hero */
+.hero{
+  background:#0c2a36;
+  color:#fff;
+  padding: clamp(24px, 4vw, 40px) 20px 28px;
+  position: sticky;
+  top:0;
+  z-index: 5;
+  box-shadow: 0 10px 20px rgba(0,0,0,.12);
+}
+.hero__top{
+  display:flex; align-items:center; justify-content:space-between;
+  max-width:1200px; margin:0 auto 12px;
+}
+.logo-badge{
+  width:46px; height:46px; border-radius:50%;
+  background: radial-gradient(60% 60% at 30% 30%, #ffefb0 0%, #d0a93a 55%, #a07b1f 100%);
+  box-shadow: inset 0 2px 6px rgba(255,255,255,.35), inset 0 -4px 10px rgba(0,0,0,.35), 0 6px 16px rgba(0,0,0,.35);
+  display:grid; place-items:center;
+  color:#2a1c05; font-weight:800;
+}
+.api-badge{
+  padding:8px 14px; border-radius:999px; font-weight:700; font-size:14px;
+  color:#0c2a36; background:#d9dfe3;
+}
+.api-badge--ok{ background:#3ad38a; color:#05311d }
+.api-badge--ko{ background:#ffb4b4; color:#5b0d0d }
+
+.hero__title{
+  text-align:center; font-size: clamp(32px, 6vw, 64px); font-weight:800;
+  letter-spacing:.02em; line-height:1.15; margin-top:4px;
+  background: linear-gradient(180deg, #ffefb0 0%, #d4af37 40%, #a07b1f 80%);
+  -webkit-background-clip:text; background-clip:text; color:transparent;
+  text-shadow:
+    0 2px 0 rgba(0,0,0,.12),
+    0 6px 14px rgba(0,0,0,.25);
+}
+.hero__subtitle{
+  text-align:center; margin-top:10px; opacity:.9; font-weight:600;
+}
+
+/* Container */
+.container{max-width:1200px; width:100%; margin:0 auto; padding:24px 16px 32px;}
+
+/* Grid of cards */
+.grid{
+  display:grid;
+  gap:22px;
+  grid-template-columns: repeat(1, minmax(260px, 1fr));
+  justify-items:center;
+}
+@media (min-width:700px){
+  .grid{ grid-template-columns: repeat(2, minmax(280px, 1fr)); }
+}
+@media (min-width:1024px){
+  .grid{ grid-template-columns: repeat(3, minmax(300px, 1fr)); }
+}
+
+.card{
+  width:100%;
+  max-width: 360px;
+  border-radius:22px;
+  padding:18px 20px;
+  background:#ffffff;
+  box-shadow:
+    0 8px 24px rgba(0,0,0,.10),
+    inset 0 0 0 1px rgba(255,255,255,.4);
+  display:flex; flex-direction:column; gap:10px;
+}
+.card__title{
+  font-size:22px; font-weight:800; letter-spacing:.02em; color:#0b2530;
+  display:flex; align-items:center; gap:10px;
+}
+.card__row{ display:flex; gap:8px; align-items:baseline; font-weight:600; }
+.card__row span{ opacity:.7 }
+
+/* Pastel variants */
+.card--loto{ background: linear-gradient(180deg,#8790ff22,#8790ff18), #fff; }
+.card--euromillions{ background: linear-gradient(180deg,#2aa0ff22,#2aa0ff18), #fff; }
+.card--eurodreams{ background: linear-gradient(180deg,#21d6a022,#21d6a018), #fff; }
+.card--keno{ background: linear-gradient(180deg,#ffc84222,#ffc84218), #fff; }
+.card--specials{ background: linear-gradient(180deg,#ff8e8e22,#ff8e8e18), #fff; }
+.card--cressendo{ background: linear-gradient(180deg,#8e8eff22,#8e8eff18), #fff; }
+
+/* Actions */
+.actions{
+  margin:26px auto 12px; display:flex; gap:12px; justify-content:center; flex-wrap:wrap;
+}
+.btn{
+  border:none; cursor:pointer; padding:12px 18px; border-radius:14px; font-weight:800;
+  box-shadow: 0 8px 18px rgba(0,0,0,.12);
+}
+.btn--gold{
+  color:#2a1c05;
+  background: linear-gradient(180deg,#ffefb0,#d4af37);
+}
+.btn--ghost{
+  background:#eef3f6; color:#0b2530; border:1px solid #d7e0e6;
+}
+
+/* Logs */
+.logs{ margin:10px auto 0; max-width:1200px; }
+.logs__pre{
+  background:#0e2a38; color:#d3ecf7; border-radius:16px; padding:16px 18px;
+  min-height:140px; max-height:220px; overflow:auto; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  box-shadow: 0 10px 22px rgba(0,0,0,.12);
+}
+
+/* Footer */
+.footer{ margin-top:auto; padding:18px 0 30px; text-align:center; }
+.footer p{
+  display:inline-block; background:#f6efe4; border-radius:999px; padding:10px 16px; font-weight:700;
+  box-shadow: 0 6px 16px rgba(0,0,0,.10);
+}
