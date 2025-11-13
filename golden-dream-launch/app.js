@@ -1,191 +1,150 @@
-/* ===========================
-   CONFIG — à adapter si besoin
-   =========================== */
+// ================= Golden Dream Front =================
+const API_BASE = "http://127.0.0.1:8080/v1";
 
-/**
- * Base de l’API (santé OK chez toi)
- */
-const API_BASE = "http://127.0.0.1:8080";
+const $ = (sel) => document.querySelector(sel);
 
-/**
- * Mapping des endpoints pour “dernier tirage” et “prédiction”.
- * 👉 Renseigne les vrais chemins dès qu’ils sont prêts.
- *
- * Exemple possible côté API :
- *   - GET /v1/loto/latest         → { numbers: [..], chance: X }  (ou { draw: "…" })
- *   - GET /v1/loto/prediction     → { numbers: [..], chance: X }
- *
- * Si la route est vide (""), la carte affichera "—".
- */
-const ENDPOINTS = {
-  loto:        { last: "/v1/loto/latest",        pred: "/v1/loto/prediction" },
-  euromillions:{ last: "/v1/euromillions/latest",pred: "/v1/euromillions/prediction" },
-  eurodreams:  { last: "/v1/eurodreams/latest",  pred: "/v1/eurodreams/prediction" },
-  keno:        { last: "/v1/keno/latest",        pred: "/v1/keno/prediction" },
-  specials:    { last: "/v1/specials/latest",    pred: "/v1/specials/prediction" },
-  cressendo:   { last: "/v1/cressendo/latest",   pred: "/v1/cressendo/prediction" }
-};
+function log(msg) {
+  const box = $("#logbox");
+  const ts = new Date().toTimeString().slice(0, 8);
+  box.textContent += `\n[${ts}] ${msg}`;
+  box.scrollTop = box.scrollHeight;
+}
 
-/* ================
-   Sélecteurs & UI
-   ================ */
-
-const $apiBadge = document.getElementById("apiBadge");
-const $logs = document.getElementById("logs");
-const $btnRefresh = document.getElementById("btnRefresh");
-const $btnReset = document.getElementById("btnReset");
-
-/* ============
-   Utilitaires
-   ============ */
-
-const log = (line) => {
-  const ts = new Date().toLocaleTimeString("fr-FR", { hour12: false });
-  $logs.textContent += `[${ts}] ${line}\n`;
-  $logs.scrollTop = $logs.scrollHeight;
-};
-
-const setApiBadge = (status) => {
-  if (status === "ok") {
-    $apiBadge.textContent = "API : OK";
-    $apiBadge.classList.remove("api-badge--ko");
-    $apiBadge.classList.add("api-badge--ok");
-  } else if (status === "ko") {
-    $apiBadge.textContent = "API : KO";
-    $apiBadge.classList.remove("api-badge--ok");
-    $apiBadge.classList.add("api-badge--ko");
+function setApiBadge(ok) {
+  const badge = $("#api-badge");
+  if (!badge) return;
+  if (ok) {
+    badge.classList.remove("api-ko");
+    badge.classList.add("api-ok");
+    badge.textContent = "API : OK";
   } else {
-    $apiBadge.textContent = "API : —";
-    $apiBadge.classList.remove("api-badge--ok", "api-badge--ko");
+    badge.classList.remove("api-ok");
+    badge.classList.add("api-ko");
+    badge.textContent = "API : KO";
   }
-};
+}
 
-const asDisplay = (payload) => {
-  // Essaie de deviner les numéros selon quelques structures usuelles
-  if (!payload || typeof payload !== "object") return "—";
-  if (Array.isArray(payload.numbers)) {
-    const base = payload.numbers.join(" ");
-    if (payload.chance !== undefined) return `${base}  |  Chance: ${payload.chance}`;
-    if (payload.star   !== undefined) return `${base}  |  Étoiles: ${payload.star}`;
-    return base;
-  }
-  if (payload.draw) return String(payload.draw);
-  if (payload.result) return String(payload.result);
-  // fallback lisible
-  try { return JSON.stringify(payload); } catch { return "—"; }
-};
+async function apiGet(path) {
+  const url = `${API_BASE}${path}`;
+  const res = await fetch(url, { cache: "no-store" });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return res.json();
+}
 
-const fetchJson = async (url, timeoutMs = 6000) => {
-  const ctrl = new AbortController();
-  const timer = setTimeout(()=>ctrl.abort(), timeoutMs);
-  try{
-    const res = await fetch(url, { signal: ctrl.signal });
-    clearTimeout(timer);
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    return await res.json();
-  }catch(err){
-    throw err;
-  }
-};
-
-/* =====================
-   Santé API + Récup data
-   ===================== */
-
-const healthUrl = `${API_BASE}/v1/health`;
-let pollTimer = null;
-
-const checkHealth = async () => {
-  try{
-    const j = await fetchJson(healthUrl, 4000);
-    if (j && (j.status === "ok" || j.status === "OK")) {
-      setApiBadge("ok");
-      log("API OK");
-      return true;
-    }
-    setApiBadge("ko");
-    log("API KO (réponse santé)");
-    return false;
-  }catch(e){
-    setApiBadge("ko");
-    log("API KO (réseau/santé)");
+async function pingApi() {
+  try {
+    const j = await apiGet("/health");
+    const ok = j && (j.status === "ok" || j.statut === "ok");
+    setApiBadge(ok);
+    log(`API OK (${API_BASE})`);
+    return ok;
+  } catch (e) {
+    setApiBadge(false);
+    log(`API KO : ${e.message}`);
     return false;
   }
-};
+}
 
-const updateCard = async (gameKey) => {
-  const cfg = ENDPOINTS[gameKey] || {};
-  const lastSel = document.querySelector(`[data-last="${gameKey}"]`);
-  const predSel = document.querySelector(`[data-pred="${gameKey}"]`);
-  if (!lastSel || !predSel) return;
+function fill(id, val) {
+  const el = $(`#${id}`);
+  if (el) el.textContent = val ?? "—";
+}
 
-  // Si les routes ne sont pas encore définies → affichage neutre
-  if (!cfg.last || !cfg.pred) {
-    lastSel.textContent = "—";
-    predSel.textContent = "—";
-    return;
-  }
+function formatNums(obj) {
+  if (!obj || !Array.isArray(obj.nums)) return "—";
+  return obj.nums.join(" ");
+}
 
-  try{
-    const [last, pred] = await Promise.all([
-      fetchJson(`${API_BASE}${cfg.last}`, 6000).catch(()=>null),
-      fetchJson(`${API_BASE}${cfg.pred}`, 6000).catch(()=>null),
+function formatEm(obj) {
+  if (!obj || !Array.isArray(obj.nums)) return "—";
+  const nums = obj.nums.join(" ");
+  const etoiles = Array.isArray(obj.etoiles) ? obj.etoiles.join(" ") : "";
+  return etoiles ? `${nums} | ⭐ ${etoiles}` : nums;
+}
+
+function formatEd(obj) {
+  if (!obj || !Array.isArray(obj.nums)) return "—";
+  const nums = obj.nums.join(" ");
+  const dream = obj.dream ?? "";
+  return dream ? `${nums} | 🌙 ${dream}` : nums;
+}
+
+// Keno : choisir midi/soir selon horodatage
+function formatKeno(lastKeno) {
+  if (!lastKeno) return "—";
+  const midiTs = lastKeno.midi?.timestamp ? new Date(lastKeno.midi.timestamp).getTime() : -1;
+  const soirTs = lastKeno.soir?.timestamp ? new Date(lastKeno.soir.timestamp).getTime() : -1;
+  const useSoir = soirTs >= midiTs;
+  const pick = useSoir ? lastKeno.soir : lastKeno.midi;
+  if (!pick || !Array.isArray(pick.nums)) return "—";
+  return pick.nums.join(" ");
+}
+
+async function loadAll() {
+  const ok = await pingApi();
+  if (!ok) return;
+
+  try {
+    const [
+      lastLoto, predLoto,
+      lastEm, predEm,
+      lastEd, predEd,
+      lastKeno, predKeno,
+      lastSpec, predSpec,
+      lastCres, predCres
+    ] = await Promise.all([
+      apiGet("/last/loto").catch(()=>null),
+      apiGet("/pred/loto").catch(()=>null),
+      apiGet("/last/euromillions").catch(()=>null),
+      apiGet("/pred/euromillions").catch(()=>null),
+      apiGet("/last/eurodreams").catch(()=>null),
+      apiGet("/pred/eurodreams").catch(()=>null),
+      apiGet("/last/keno").catch(()=>null),
+      apiGet("/pred/keno").catch(()=>null),
+      apiGet("/last/specials").catch(()=>null),
+      apiGet("/pred/specials").catch(()=>null),
+      apiGet("/last/cressendo").catch(()=>null),
+      apiGet("/pred/cressendo").catch(()=>null)
     ]);
-    lastSel.textContent = last ? asDisplay(last) : "—";
-    predSel.textContent = pred ? asDisplay(pred) : "—";
-  }catch(e){
-    lastSel.textContent = "—";
-    predSel.textContent = "—";
+
+    fill("last-loto",        formatNums(lastLoto));
+    fill("pred-loto",        formatNums(predLoto));
+
+    fill("last-euromillions",formatEm(lastEm));
+    fill("pred-euromillions",formatEm(predEm));
+
+    fill("last-eurodreams",  formatEd(lastEd));
+    fill("pred-eurodreams",  formatEd(predEd));
+
+    fill("last-keno",        formatKeno(lastKeno));
+    fill("pred-keno",        formatNums(predKeno));
+
+    fill("last-specials",    formatNums(lastSpec));
+    fill("pred-specials",    formatNums(predSpec));
+
+    fill("last-cressendo",   formatNums(lastCres));
+    fill("pred-cressendo",   formatNums(predCres));
+
+  } catch (e) {
+    log(`Erreur chargement : ${e.message}`);
   }
-};
+}
 
-const refreshAll = async () => {
-  const ok = await checkHealth();
-  const games = Object.keys(ENDPOINTS);
-  if (ok){
-    // Met à jour toutes les cartes en parallèle
-    await Promise.all(games.map(updateCard));
-  } else {
-    // En KO, on met juste des tirets propres
-    games.forEach(g=>{
-      const l = document.querySelector(`[data-last="${g}"]`);
-      const p = document.querySelector(`[data-pred="${g}"]`);
-      if (l) l.textContent = "—";
-      if (p) p.textContent = "—";
-    });
-  }
-};
-
-const startPolling = () => {
-  stopPolling();
-  pollTimer = setInterval(()=> {
-    checkHealth();
-  }, 15000); // toutes les 15s
-};
-const stopPolling = () => {
-  if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
-};
-
-/* ==========
-   Actions UI
-   ========== */
-
-$btnRefresh.addEventListener("click", refreshAll);
-
-$btnReset.addEventListener("click", () => {
-  stopPolling();
-  $logs.textContent = "";
-  setApiBadge(); // état neutre
-  log("Réinitialisation affichage/Logs effectuée.");
-  startPolling();
-});
-
-/* ==============
-   Démarrage page
-   ============== */
+function wireUi() {
+  $("#btn-refresh")?.addEventListener("click", loadAll);
+  $("#btn-reset")?.addEventListener("click", async () => {
+    try {
+      await apiGet("/reset").catch(()=>null);
+      $("#logbox").textContent = "[00:00:00] Ready";
+      log("Reset demandé.");
+      await loadAll();
+    } catch (e) {
+      log(`Erreur reset : ${e.message}`);
+    }
+  });
+}
 
 window.addEventListener("DOMContentLoaded", async () => {
-  log("Ready");
-  await refreshAll();
-  startPolling();
+  wireUi();
+  await loadAll();
 });

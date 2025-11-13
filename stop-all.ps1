@@ -1,35 +1,18 @@
-﻿# stop-all.ps1
-Set-StrictMode -Version Latest
-$ErrorActionPreference = 'Stop'
+﻿#Requires -Version 7
+$ErrorActionPreference = "SilentlyContinue"
 
-$root   = Join-Path $env:USERPROFILE 'golden-dream'
-$apiPid = Join-Path $root '.uvicorn.pid'
-$frontPidFile = Join-Path $root 'golden-dream-launch\.front.pid'
+$apiPort = 8080
+$frontPort = 5173
 
-Write-Host "→ Arrêt des services…"
+# Stop par port
+(Get-NetTCPConnection -LocalPort $apiPort -State Listen).OwningProcess | % { Get-Process -Id $_ } | Stop-Process -Force
+(Get-NetTCPConnection -LocalPort $frontPort -State Listen).OwningProcess | % { Get-Process -Id $_ } | Stop-Process -Force
 
-# Arrêt API (via PID enregistré)
-if (Test-Path $apiPid) {
-    try {
-        $gdPid = (Get-Content $apiPid | ForEach-Object { $_.Trim() } | Select-Object -First 1)
-        if ($gdPid -match '^\d+$') {
-            Write-Host "  - Stop API (PID $gdPid)…"
-            Stop-Process -Id [int]$gdPid -ErrorAction SilentlyContinue
-        }
-    } catch { }
-    Remove-Item $apiPid -Force -ErrorAction SilentlyContinue
-}
+# Stop par binaire du venv
+$root = Join-Path $env:USERPROFILE "golden-dream"
+$api  = Join-Path $root "api"
+$venv = Join-Path $api ".venv-gd"
+$py   = Join-Path $venv "Scripts\python.exe"
 
-# Arrêt Front (via PID enregistré)
-if (Test-Path $frontPidFile) {
-    try {
-        $frontPid = (Get-Content $frontPidFile | ForEach-Object { $_.Trim() } | Select-Object -First 1)
-        if ($frontPid -match '^\d+$') {
-            Write-Host "  - Stop Front (PID $frontPid)…"
-            Stop-Process -Id [int]$frontPid -ErrorAction SilentlyContinue
-        }
-    } catch { }
-    Remove-Item $frontPidFile -Force -ErrorAction SilentlyContinue
-}
-
-Write-Host "✓ Services arrêtés."
+Get-Process -Name "uvicorn","python" | Where-Object { $_.Path -eq $py } | Stop-Process -Force
+Write-Host "✓ Processus arrêtés." -ForegroundColor Yellow
